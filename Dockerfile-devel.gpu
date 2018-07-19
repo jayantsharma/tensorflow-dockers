@@ -1,0 +1,77 @@
+FROM tensorflow/tensorflow:latest-devel-gpu-py3
+# FROM tensorflow/tensorflow:latest-gpu-py3
+# FROM nvidia/cuda:9.0-base-ubuntu16.04
+# FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
+
+##########################################################################################
+# CUSTOMIZATION
+
+# TF-Serving
+# pkg dependencies
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libcurl3-dev \
+        git \
+        swig \
+        zip \
+        zlib1g-dev \
+        && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# # whl package
+# RUN pip --no-cache-dir install \
+#         grpcio \
+#         tensorflow-serving-api-python3
+
+# Packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gdb \
+    vim \
+    less \
+    wget \
+    ctags \
+    python3-tk \
+    && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
+
+# dotfiles
+RUN git clone https://github.com/jayantsharma/dotfiles.git
+RUN cp dotfiles/.bashrc_essential /root/.bashrc
+RUN cp dotfiles/git-completion.bash /root/.git-completion.bash
+RUN cp -R dotfiles/.vim dotfiles/.vimrc /root/
+# pathogen
+RUN mkdir -p /root/.vim/autoload /root/.vim/bundle && \
+      curl -LSso /root/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
+# ipython startup files
+RUN cp -R dotfiles/.ipython /root/
+# clean
+RUN rm -rf dotfiles
+
+# vim-jedi
+RUN git clone --recursive https://github.com/davidhalter/jedi-vim.git /root/.vim/bundle/jedi-vim
+
+# progress bar
+RUN pip --no-cache-dir install \
+    ipdb \
+    PyQt5 \
+    glances \
+    nvidia-ml-py3 \
+    progress \
+    tabulate \
+    jupyterthemes
+
+
+# BAZEL for custom TF compile
+
+# RUN git clone https://github.com/tensorflow/tensorflow.git /tensorflow
+# 
+# RUN wget https://github.com/bazelbuild/bazel/releases/download/0.10.0/bazel-0.10.0-installer-linux-x86_64.sh
+# RUN chmod +x bazel-0.10.0-installer-linux-x86_64.sh
+# RUN ./bazel-0.10.0-installer-linux-x86_64.sh --user
+# RUN echo 'export PATH="$HOME/bin:$PATH"' >> /root/.bashrc
+
+# COPY libcudnn7-dev_7.0.5.15-1+cuda9.0_amd64.deb .
+# RUN dpkg -i libcudnn7-dev_7.0.5.15-1+cuda9.0_amd64.deb
+##########################################################################################
